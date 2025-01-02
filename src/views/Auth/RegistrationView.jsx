@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import InputComponent from '../components/InputComponent';
-import ButtonComponent from '../components/ButtonComponent';
-import axios from "../api/axios";
-
+import InputComponent from "../../components/InputComponent";
+import ButtonComponent from "../../components/ButtonComponent";
+import axios from "../../api/axios";
 
 const RegistrationView = () => {
-  
     const [formData, setFormData] = useState({
         surname: "",
         first_name: "",
@@ -25,7 +23,7 @@ const RegistrationView = () => {
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;
-        if(name === "dob" && !isOlderThan18(value)){
+        if (name === "dob" && !isOlderThan18(value)) {
             alert("You must be 18 years or older to register");
             formData.dob = "";
             return;
@@ -40,15 +38,16 @@ const RegistrationView = () => {
         e.preventDefault();
         console.log("Submitting data for registration");
         try {
-            await axios.post("auth/register", formData)
-                .then( response => {
+            await axios
+                .post("auth/register", formData)
+                .then((response) => {
                     console.log("Response from express server");
                     console.log(response.data);
                 })
-                .catch( error => {
+                .catch((error) => {
                     console.error("Error from express server");
                     console.error(error);
-                })
+                });
         } catch (error) {
             console.error("Error submitting registration form: ", error);
         }
@@ -142,6 +141,6 @@ const RegistrationView = () => {
             </div>
         </div>
     );
-}
+};
 
-export default RegistrationView
+export default RegistrationView;
