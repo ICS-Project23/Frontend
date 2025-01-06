@@ -7,6 +7,8 @@ import Positions from "./views/Voter/Positions";
 import Bus from "./utils/Bus";
 import BannerNotification from "./components/BannerNotification";
 import AdminDashboard from "./views/Admin/AdminDashboard";
+import AddElection from "./views/Admin/AddElection";
+import AddCandidate from "./views/Admin/AddCandidate";
 
 function App() {
     window.flash = (message, type = "success") =>
@@ -21,6 +23,8 @@ function App() {
                     path="/dashboard/positions/:id"
                     element={ <Positions /> } />
                 <Route path="admin/dashboard" element={ <AdminDashboard /> } />
+                <Route path="admin/add-election" element={<AddElection />} />
+                <Route path="admin/add-candidate" element={<AddCandidate />} />
             </Routes>
         </BrowserRouter></>
     );

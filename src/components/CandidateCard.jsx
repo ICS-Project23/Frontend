@@ -1,11 +1,14 @@
 import React from 'react'
 
 const CandidateCard = ({candidate}) => {
+  let src = candidate.cid
+      ? `http://localhost:8080/ipfs/${candidate.cid}`
+      : "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp";
   return (
       <div className="carousel-item rounded-lg flex flex-col bg-base-100 w-96 shadow-xl m-5 hover:shadow-2xl hover:scale-105 hover:cursor-pointer duration-300">
           <figure>
               <img
-                  src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+                  src={src}
                   alt="Shoes"
               />
           </figure>

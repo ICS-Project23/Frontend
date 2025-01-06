@@ -1,50 +1,92 @@
-import React, {useState} from "react";
+import React, { useEffect, useState } from "react";
 import TopNavBar from "../../components/TopNavBar";
 import AdminSideBar from "../../components/AdminSideBar";
-import AddElection from "../../components/AddElection";
-import AddCandidate from "../../components/AddCandidate";
+import axios from "../../api/axios";
 
 const AdminDashboard = () => {
-    const [isElectionMgt, setisElectionMgt] = useState(false)
-    const [isCandidateMgt, setisCandidateMgt] = useState(false)
+    const [electionStatus, setElectionStatus] = useState(false);
 
-    const handleElectionMgtClick = () => {
-        setisElectionMgt(true)
-        setisCandidateMgt(false)
-    }
-    const handleCandidateMgtClick = () => {
-        console.log("Candidate Mgt Clicked");
-        setisElectionMgt(false)
-        setisCandidateMgt(true)
-    }
+    const getElectionStatus = () => {
+        axios
+            .get("/election")
+            .then((result) => {
+                console.log("Results from server");
+                setElectionStatus(result.data);
+            })
+            .catch((error) => {
+                console.error("Error from server");
+                console.error(error);
+            });
+    };
+    const getElection = () => {
+        return axios
+            .get("/election/")
+            .then((results) => {
+                console.log("Results from server");
+                let results_array = results.data;
+                console.log(results_array);
+                // setElectionId(results_array[results_array.length - 1].id);
+                return results_array[results_array.length - 1];
+            })
+            .catch((error) => {
+                console.log("Error from server");
+                console.log(error);
+            });
+    };
+
+    const startElection = () => {
+        axios
+            .post("/election/start")
+            .then((result) => {
+                console.log("Results from server");
+            })
+            .catch((error) => {
+                console.error("Error from server");
+                console.error(error);
+            });
+    };
+    const stopElection = () => {
+        axios
+            .post("/election/stop")
+            .then((result) => {
+                console.log("Results from server");
+            })
+            .catch((error) => {
+                console.error("Error from server");
+                console.error(error);
+            });
+    };
+
+    useEffect(() => {
+        getElection()
+            .then((election) => {
+                console.log(election);
+                const now = new Date();
+                const start = new Date(election.start);
+                const end = new Date(election.end);
+                if (now > start && electionStatus != true) {
+                    startElection();
+                } else if (now > end && electionStatus != false) {
+                    stopElection();
+                }
+            })
+            .catch((error) => {
+                console.error("Error from server");
+                console.error(error);
+            });
+    }, []);
+
     return (
         <>
             <TopNavBar name="Admin Dashboard" />
             <div className="w-full h-screen flex flex-row">
-                <AdminSideBar
-                    onElectionMgtClick={() => {
-                        handleElectionMgtClick();
-                    }}
-                    onCandidateMgtClick={() => {
-                        handleCandidateMgtClick();
-                    }}
-                    onDashboardClick={() => {
-                        setisCandidateMgt(false)
-                        setisElectionMgt(false)
-                    }}
-                />
+                <AdminSideBar />
                 <main className="w-3/4">
-                    {
-                        !isCandidateMgt & !isElectionMgt &&(
-                            <iframe
-                        src="http://localhost:3000/d/XE4V0WGZz/votex-overview?orgId=1&refresh=5s&from=now-5m&to=now"
+                    {/* <iframe
+                        src="https://snapshots.raintank.io/dashboard/snapshot/cFbPJpTAALCq74CuDWpYclrXdgbugIZR"
                         width="1200"
                         height="800"
-                    />
-                        )
-                    }
-                    {isCandidateMgt && <AddCandidate /> }
-                    {isElectionMgt && <AddElection />}
+                    /> */}
                 </main>
             </div>
         </>

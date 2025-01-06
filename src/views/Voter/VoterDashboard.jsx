@@ -44,11 +44,11 @@ const VoterDashboard = () => {
     })
     
     const getElections = () => {
-        let elections = getData("elections_list");
-        if (elections) {
-            setElections(elections);
-            return;
-        }
+        // let elections = getData("elections_list");
+        // if (elections.length > 0) {
+        //     setElections(elections);
+        //     return;
+        // }
         axios
             .get("/election/")
             .then((result) => {
@@ -109,8 +109,8 @@ const VoterDashboard = () => {
     }, [navigate]);
 
     useEffect(() => {
-        // const now = new Date();
-        // const end = new Date(endDate);
+        const now = new Date();
+        const end = new Date(endDate);
         if (now < end) {
             setIsElectionStarted(true);
         } else {
@@ -137,8 +137,8 @@ const VoterDashboard = () => {
                             <option disabled selected>
                                 Choose Election
                             </option>
-                            {elections.map((election) => (
-                                <option key={election.id} value={election.id}>
+                            {elections.map((election, index) => (
+                                <option key={index} value={election.id}>
                                     {election.name}
                                 </option>
                             ))}
