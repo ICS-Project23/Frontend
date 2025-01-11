@@ -6,27 +6,29 @@ import CandidateCard from "../../components/CandidateCard";
 import CandidateModal from "../../components/CandidateModal";
 import LiveClockUpdate from "../../components/LiveClockUpdate";
 import InputComponent from "../../components/InputComponent";
-// import socket from "../../config/Socket";
-import { useSocket } from "../../context/SocketIoContext";
+import { ws } from "../../config/Socket";
+import LiveResults from "../../components/LiveResults";
 
 const Positions = () => {
-    const socket = useSocket();
+    // const socket = useSocket();
     const navigate = useNavigate();
     const location = useLocation();
-    const { position } = location.state;
+    const { position, election_id } = location.state;
     const [startDate, setStartDate] = useState("1 January, 2025");
     const [endDate, setEndDate] = useState("2 January, 2025");
     const [candidates, setCandidates] = useState([]);
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [electionStatus, setelectionStatus] = useState(null);
-    const [electionResults, setElectionResults] = useState([]);
-    const [electionId, setElectionId] = useState(null);
 
     const getCandidatesForPosition = () => {
         axios
-            .get("/candidate/position/" + position.id)
+            .get(
+                "/candidate/position/" +
+                    position.id +
+                    "/election/" +
+                    election_id
+            )
             .then((result) => {
-                console.log("Candidates for position");
                 setCandidates(result.data);
             })
             .catch((error) => {
@@ -37,7 +39,7 @@ const Positions = () => {
 
     const getElectionStatus = () => {
         axios
-            .get("/election/status")
+            .get("/election/"+election_id+"/status")
             .then((result) => {
                 console.log("Election status UI");
                 console.log(result.data);
@@ -59,7 +61,7 @@ const Positions = () => {
                 .post("/vote", {
                     candidateId: selectedCandidate,
                     positionId: position.id,
-                    electionId: electionId,
+                    electionId: election_id,
                 })
                 .then((result) => {
                     console.log("Vote cast successfully");
@@ -76,57 +78,18 @@ const Positions = () => {
         }
     };
 
-    const getElectionResults = () => {
-        console.log("Getting election results ...");
-        axios
-            .get("/vote/results", {
-                params: {
-                    position_id: position.id,
-                },
-            })
-            .then((result) => {
-                console.log("Election results");
-                console.log(result.data);
-                setElectionResults(result.data);
-            })
-            .catch((error) => {
-                console.log("Error getting election results");
-                console.log(error);
-            });
-    };
-
     const getElectionId = () => {
         return axios
             .get("/election/")
             .then((results) => {
                 console.log("Results from server");
                 let results_array = results.data;
+                console.log("results_array");
                 console.log(results_array);
-                setElectionId(results_array[results_array.length - 1].id);
+                // setElectionId(results_array[);
             })
             .catch((error) => {
                 console.log("Error from server");
-                console.log(error);
-            });
-    };
-
-    const handleGetResults = (e) => {
-        e.preventDefault();
-        console.log("Getting election results ...");
-        console.log(e.target.value);
-        axios
-            .get("/vote/results", {
-                params: {
-                    position_id: e.target.value,
-                },
-            })
-            .then((result) => {
-                console.log("Election results");
-                console.log(result.data);
-                setElectionResults(result.data);
-            })
-            .catch((error) => {
-                console.log("Error getting election results");
                 console.log(error);
             });
     };
@@ -135,51 +98,12 @@ const Positions = () => {
         getElectionId();
         getCandidatesForPosition();
         getElectionStatus();
-        // getElectionResults();
-        if (socket) {
-            socket.emit("join", position.id);
-        
-        socket.on("results_event", (ID, Full_Name, Party, VoteCount) => {
-            console.log("CandidateResultsEvent Received");
-            setElectionResults((prevResults) => {
-                const updatedResults = [...prevResults];
-                updatedResults[ID] = {
-                    id: ID,
-                    name: Full_Name,
-                    voteCount: VoteCount,
-                    party: Party,
-                };
-                return updatedResults;
-            });
-        });
-
-        socket.on("vote_update", (voter, candidateId) => {
-            console.log("Vote Cast Event received");
-            console.log("Voter:", voter);
-            console.log("CandidateId:", candidateId);
-            setElectionResults((prevResults) => {
-                const updatedResults = [...prevResults];
-                if (updatedResults[candidateId]) {
-                    updatedResults[candidateId].voteCount += 1;
-                }
-                return updatedResults;
-            });
-        });
-
-        return () => {
-            socket.off("results_event");
-            socket.off("vote_update");
-        }
-    }
     }, []);
 
-    /*
-     * Event listeneers
-     */
-
+    
     return (
-        <div className="w-full h-[100vh] flex flex-col items-center p-10">
-            <TopNavBar />
+        <div className="w-full h-[100vh] flex flex-col items-center justify-start p-10">
+            <TopNavBar name={"Voter Dashboard"} />
             <div className="w-full h-full flex flex-row justify-around">
                 <div className="w-3/4 h-full mr-2">
                     <div>
@@ -253,28 +177,7 @@ const Positions = () => {
                         </form>
                     </div>
                     <div>
-                        <div>
-                            <h2>Live Update</h2>
-                            <button onClick={handleGetResults} value={1}>Click</button>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Candiadate Name</th>
-                                    <th>Party</th>
-                                    <th>Votes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {electionResults.map((result) => (
-                                    <tr key={result.id}>
-                                        <td>{result.name}</td>
-                                        <td>{result.party}</td>
-                                        <td>{result.voteCount}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                        <LiveResults position_id={position.id} election_id={election_id} />
                     </div>
                     <dialog id="my_modal_1" className="modal">
                         <div className="modal-box">

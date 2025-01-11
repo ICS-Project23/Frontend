@@ -9,6 +9,8 @@ import BannerNotification from "./components/BannerNotification";
 import AdminDashboard from "./views/Admin/AdminDashboard";
 import AddElection from "./views/Admin/AddElection";
 import AddCandidate from "./views/Admin/AddCandidate";
+import AdminLoginView from "./views/Auth/AdminLoginView";
+import AdminRegistrationView from "./views/Auth/AdminRegistrationView";
 
 function App() {
     window.flash = (message, type = "success") =>
@@ -22,6 +24,8 @@ function App() {
                 <Route
                     path="/dashboard/positions/:id"
                     element={ <Positions /> } />
+                <Route path="admin/login" element={<AdminLoginView />} />
+                <Route path="admin/register" element={ <AdminRegistrationView /> } />
                 <Route path="admin/dashboard" element={ <AdminDashboard /> } />
                 <Route path="admin/add-election" element={<AddElection />} />
                 <Route path="admin/add-candidate" element={<AddCandidate />} />

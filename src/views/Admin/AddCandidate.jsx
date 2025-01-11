@@ -6,20 +6,23 @@ import { ipfs } from "../../config/ipfs";
 import { Buffer } from "buffer";
 import TopNavBar from "../../components/TopNavBar";
 import AdminSideBar from "../../components/AdminSideBar";
-
+import { redirect, useNavigate, useNavigation } from "react-router-dom";
 
 const AddCandidate = () => {
+    const navigate = useNavigate();
+
+    const [electionId, setElectionId] = React.useState(null);
     const [candidate, setCandidate] = React.useState({
         full_name: "",
         dob: "",
         position_id: "",
         party: "",
         cid: "",
+        election_id: electionId,
     });
     const [file, setFile] = React.useState();
     const [positions, setPositions] = React.useState([]);
     const [elections, setElections] = React.useState([]);
-    const [electionId, setElectionId] = React.useState(null);
 
     const getPositions = (election_id) => {
         axios
@@ -37,15 +40,24 @@ const AddCandidate = () => {
         console.log(`Name: ${name}, Value: ${value}`);
         if (name === "election_id") {
             setElectionId(value);
-        } else {
-            setCandidate((prevCandidate) => ({
-                ...prevCandidate,
-                [name]: value,
-            }));
-            console.log("Updated Candidate");
-            console.log(candidate);
         }
+        setCandidate((prevCandidate) => ({
+            ...prevCandidate,
+            [name]: value,
+        }));
+        console.log("Updated Candidate");
+        console.log(candidate);
     };
+    const authenticate = () => {
+            return axios
+                .get("/auth/verify/admin")
+                .then((result) => {
+                    console.log(result);
+                })
+                .catch((error) => {
+                    navigate("/admin/login");
+                });
+        };
     const updateWithIPFS = async () => {
         try {
             console.log("Getting IPFS....");
@@ -82,15 +94,15 @@ const AddCandidate = () => {
         e.preventDefault();
 
         try {
-            const candidateCid = await updateWithIPFS();
-            console.log("CID: ", candidateCid);
+            // const candidateCid = await updateWithIPFS();
+            // console.log("CID: ", candidateCid);
             // const updatedCandidate = {
             //     ...candidate,
             //     cid: "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
             // };
             setCandidate((prev) => ({
                 ...prev,
-                cid: candidateCid,
+                cid: "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
             }));
 
             console.log("Updated Candidate");
@@ -99,6 +111,13 @@ const AddCandidate = () => {
             console.log(response.data);
             if (response.data.message == "Candidate added successfully") {
                 window.flash("Candidate added successfully", "success");
+                setCandidate({
+                    full_name: "",
+                    dob: "",
+                    position_id: "",
+                    party: "",
+                    cid: "",
+                });
             }
         } catch (error) {
             console.error("Error during candidate submission:", error);
@@ -106,8 +125,11 @@ const AddCandidate = () => {
         }
     };
     useEffect(() => {
+        authenticate().then(() => {
+            console.log("Authenticated");
+        });
         getElections();
-    }, []);
+    }, [navigate]);
     useEffect(() => {
         if (electionId) {
             getPositions(electionId);
@@ -118,7 +140,7 @@ const AddCandidate = () => {
         <>
             <TopNavBar name="Admin Dashboard" />
             <div className="w-full h-screen flex flex-row">
-                <AdminSideBar/>
+                <AdminSideBar />
                 <main className="w-3/4">
                     <div className="flex flex-col items-center justify-center w-full">
                         <p>Add Candidate</p>

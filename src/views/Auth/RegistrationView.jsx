@@ -54,8 +54,8 @@ const RegistrationView = () => {
     };
 
     return (
-        <div className="h-screen flex justify-center items-center">
-            <div className="w-1/4 md:w-1/2 border-2 shadow-xl rounded-xl">
+        <div className="h-screen w-full flex justify-center items-center">
+            <div className="w-2/3 shadow-2xl rounded-xl">
                 <div className="flex flex-col items-center justify-center my-3">
                     <p className="text-[40px] text-gray-600 tracking-wider">
                         Welcome to Votex
@@ -67,52 +67,58 @@ const RegistrationView = () => {
                     method="POST"
                     action=""
                     onSubmit={handleRegistrationForm}
-                    className="h-4/5 px-3 flex flex-col items-center justify-evenly "
+                    className="h-4/5 w-full flex flex-col items-center justify-evenly "
                 >
-                    <InputComponent
-                        label="Surname"
-                        name="surname"
-                        input_type="text"
-                        //    value={formData.surname}
-                        onChange={handleInputChange}
-                    />
-                    <InputComponent
-                        label="First Name"
-                        name="first_name"
-                        input_type="text"
-                        // value={formData.first_name}
-                        onChange={handleInputChange}
-                    />
-                    <InputComponent
-                        label="Other Names"
-                        name="other_names"
-                        input_type="text"
-                        onChange={handleInputChange}
-                    />
-                    <InputComponent
-                        label={"Date of Birth"}
-                        name="dob"
-                        input_type="date"
-                        onChange={handleInputChange}
-                    />
-                    <InputComponent
-                        label={"Nation ID/Passport Number"}
-                        name="national_identification_number"
-                        input_type={"number"}
-                        onChange={handleInputChange}
-                    />
-                    <InputComponent
-                        label={"Password"}
-                        name="password"
-                        input_type={"password"}
-                        onChange={handleInputChange}
-                    />
-                    <InputComponent
-                        label={"Confirm Password"}
-                        name="password_confirmation"
-                        input_type={"password"}
-                        onChange={handleInputChange}
-                    />
+                    <div className="flex flex-row items-center justify-around w-3/4">
+                        <div className="">
+                            <InputComponent
+                                label="Surname"
+                                name="surname"
+                                input_type="text"
+                                //    value={formData.surname}
+                                onChange={handleInputChange}
+                            />
+                            <InputComponent
+                                label="First Name"
+                                name="first_name"
+                                input_type="text"
+                                // value={formData.first_name}
+                                onChange={handleInputChange}
+                            />
+                            <InputComponent
+                                label="Other Names"
+                                name="other_names"
+                                input_type="text"
+                                onChange={handleInputChange}
+                            />
+                            <InputComponent
+                                label={"Date of Birth"}
+                                name="dob"
+                                input_type="date"
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                        <div>
+                            <InputComponent
+                                label={"Nation ID/Passport Number"}
+                                name="national_identification_number"
+                                input_type={"number"}
+                                onChange={handleInputChange}
+                            />
+                            <InputComponent
+                                label={"Password"}
+                                name="password"
+                                input_type={"password"}
+                                onChange={handleInputChange}
+                            />
+                            <InputComponent
+                                label={"Confirm Password"}
+                                name="password_confirmation"
+                                input_type={"password"}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                    </div>
 
                     {/* Capture Images if needed */}
                     {/* <div className="relative flex flex-col rounded-xl border">
