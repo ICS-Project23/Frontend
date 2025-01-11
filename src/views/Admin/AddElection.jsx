@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import InputComponent from "../../components/InputComponent";
 import axios from "../../api/axios";
-import socket from "../../config/Socket";
+import {ws} from "../../config/Socket";
 import TopNavBar from "../../components/TopNavBar";
 import AdminSideBar from "../../components/AdminSideBar";
+import { redirect, useNavigate, useNavigation } from "react-router-dom";
+
 
 const AddElection = () => {
+const navigate = useNavigate();
+
     const [election, setElection] = useState({
         name: "",
         start_date: "",
@@ -23,6 +27,17 @@ const AddElection = () => {
         }));
         console.log(election);
     };
+
+    const authenticate = () => {
+            return axios
+                .get("/auth/verify/admin")
+                .then((result) => {
+                    console.log(result);
+                })
+                .catch((error) => {
+                    navigate("/admin/login");
+                });
+        };
 
     const onAddPositionChange = (e, index, field) => {
         const updatedPositions = [...election.positions];
@@ -101,12 +116,14 @@ const AddElection = () => {
         console.log("Election Data:", election);
         // createPositions();
         createElection();
-        socket.on("Election Created Event", () => {
-            console.log("Event received");
-            getElection().then((id) => {
-                createPositions(id, election);
-            });
-        });
+        ws.onmessage = (message) => {
+            if(message.data === "Election Created Event") {
+                console.log("Event received");
+                getElection().then((id) => {
+                    createPositions(id, election);
+                });
+            }
+        }
         setElection({
             name: "",
             start_date: "",
@@ -114,7 +131,11 @@ const AddElection = () => {
             positions: [],
         });
     };
-
+    useEffect(() => {
+        authenticate().then(() => {
+            console.log("Authenticated");
+        });
+    }, [navigate]);
     useEffect(() => {
         console.log("Election ID");
         console.log(electionId);
@@ -144,13 +165,13 @@ const AddElection = () => {
                                     />
                                     <InputComponent
                                         name="start_date"
-                                        input_type="date"
+                                        input_type="datetime-local"
                                         label="Start Date"
                                         onChange={onChange}
                                     />
                                     <InputComponent
                                         name="end_date"
-                                        input_type="date"
+                                        input_type="datetime-local"
                                         label="End Date"
                                         onChange={onChange}
                                     />

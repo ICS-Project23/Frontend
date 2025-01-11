@@ -3,60 +3,50 @@ import VoterDashboardSideBar from "../../components/VoterDashboardSideBar";
 import CastVote from "../../components/CastVote";
 import axios from "../../api/axios";
 import { redirect, useNavigate, useNavigation } from "react-router-dom";
+import logo from "../../assets/votex-high-resolution-logo-transparent.png";
 import { BrowserProvider } from "ethers";
 import ButtonComponent from "../../components/ButtonComponent";
 import { ethers } from "ethers";
 import PositionComponent from "../../components/PositionComponent";
 import TopNavBar from "../../components/TopNavBar";
 import LiveClockUpdate from "../../components/LiveClockUpdate";
-import socket from "../../config/Socket";
 
 let WALLET_CONNECTED = "";
 const VoterDashboard = () => {
     const saveData = (key, value) => {
         localStorage.setItem(key, JSON.stringify(value));
     };
-    const getData = (key) => {
-        const storedValue = localStorage.getItem(key);
-        return storedValue ? JSON.parse(storedValue) : null;
-    };
+    const [electionObject, setElectionObject] = useState({
+        name: "",
+        start: "",
+        end: "",
+    });
     const [elections, setElections] = useState([]);
-    const [electionName, setElectionName] = useState(
-        getData("selected_election_name")
-    );
-    const [startDate, setStartDate] = useState(
-        getData("selected_election_startDate")
-    );
-    const [endDate, setEndDate] = useState(
-        getData("selected_election_endDate")
-    );
     const [positions, setPositions] = useState([]);
-    const [isElectionSelect, setIsElectionSelect] = useState(false);
-
     const [isElectionStarted, setIsElectionStarted] = useState(false);
+    const [isElectionEnded, setIsElectionEnded] = useState(false);
+    const [isElectionSelect, setIsElectionSelect] = useState(false);
+    const [election_id, setElectionId] = useState(null)
 
     const navigate = useNavigate();
-    socket.on("Election List cache expired", () => {
-        localStorage.removeItem("selected_election_id");
-        localStorage.removeItem("selected_election_name");
-        localStorage.removeItem("selected_election_startDate");
-        localStorage.removeItem("selected_election_endDate");
-    })
     
     const getElections = () => {
-        // let elections = getData("elections_list");
-        // if (elections.length > 0) {
-        //     setElections(elections);
-        //     return;
-        // }
         axios
             .get("/election/")
             .then((result) => {
-                console.log("Results from server");
+                console.log("getElections(). Results: ");
                 console.log(result);
                 saveData("elections_list", result.data);
                 setElections(result.data);
-                
+                const now = new Date();
+                const end = new Date(electionObject.end);
+                if (now < end) {
+                    setIsElectionStarted(true);
+                } else if (now > end) {
+                    setIsElectionEnded(true);
+                } else {
+                    setIsElectionStarted(false);
+                }
             })
             .catch((error) => {
                 console.log("Error from server");
@@ -67,8 +57,10 @@ const VoterDashboard = () => {
         axios
             .get(`/election/${election_id}/positions/`)
             .then((res) => {
+                console.log("getPositions(). Results: ");
                 console.log(res);
                 setPositions(res.data);
+                setIsElectionSelect(false);
             })
             .catch((err) => {
                 console.log(err);
@@ -86,65 +78,65 @@ const VoterDashboard = () => {
     };
 
     const handleElectionChange = (e) => {
-        setIsElectionSelect(true);
         const electionId = e.target.value;
+        setIsElectionSelect(true);
         console.log("Election ID");
         console.log(electionId);
         const election = elections.find(
             (election) => election.id == electionId
         );
         console.log("Election: ", election);
-        saveData("selected_election_name", election.name);
-        saveData("selected_election_startDate", election.start);
-        saveData("selected_election_endDate", election.end);
-        saveData("selected_election_id", electionId);
-        getPositions(getData("selected_election_id"));
+        console.log("Storing state electiion id: ", election.id);
+        setElectionObject({
+            name: election.name,
+            start: election.start,
+            end: election.end,
+        })
+        setElectionId(election.id);
+        console.log("Getting positions for election id: ", election.id);
+        getPositions(election.id);
     };
 
     useEffect(() => {
         authenticate().then(() => {
-            getElections();
+            getElections()
         });
         // getPositions();
     }, [navigate]);
 
     useEffect(() => {
-        const now = new Date();
-        const end = new Date(endDate);
-        if (now < end) {
-            setIsElectionStarted(true);
-        } else {
-            setIsElectionStarted(false);
-        }
-    })
+        console.log("Selected Election id: ", election_id)
+    }, [election_id])
 
     return (
         <>
-            <TopNavBar />
+            <TopNavBar name={"Voter Dashboard"} />
             <div
-                className={`w-full h-screen border flex flex-col items-center ${
+                className={`w-full h-screen flex flex-col items-center ${
                     positions.length == 0 ? "justif-center" : ""
                 } p-10`}
             >
-                {!isElectionSelect ? (
-                    <form className="border w-full">
-                        <h3>Select Elections</h3>
-                        <select
-                            className="select select-bordered w-1/2"
-                            name="elections"
-                            onChange={handleElectionChange}
-                        >
-                            <option disabled selected>
-                                Choose Election
+                <div className="flex flex-col items-center justify-center">
+                    <img src={logo} alt="Logo" className="w-96" />
+                </div>
+                <form className=" w-full flex flex-col items-center p-10">
+                    <h3 className="mb-3">Select Elections</h3>
+                    <select
+                        className="select select-bordered w-1/2"
+                        name="elections"
+                        onChange={handleElectionChange}
+                    >
+                        <option disabled selected>
+                            Choose Election
+                        </option>
+                        {elections.map((election, index) => (
+                            <option key={index} value={election.id}>
+                                {election.name}
                             </option>
-                            {elections.map((election, index) => (
-                                <option key={index} value={election.id}>
-                                    {election.name}
-                                </option>
-                            ))}
-                        </select>
-                    </form>
-                ) : positions.length == 0 ? (
+                        ))}
+                    </select>
+                </form>
+                {positions.length == 0 && isElectionSelect ? (
                     <p>
                         <span className="loading loading-infinity loading-lg"></span>
                     </p>
@@ -152,7 +144,7 @@ const VoterDashboard = () => {
                     <>
                         <div className="my-10 flex flex-col items-center">
                             <p className="font-serif font-bold text-4xl tracking-wide text-my_white text-center">
-                                {electionName}
+                                {electionObject.name}
                             </p>
                             <div className="mt-10 flex flex-col items-center">
                                 {isElectionStarted ? (
@@ -161,12 +153,14 @@ const VoterDashboard = () => {
                                     </p>
                                 ) : (
                                     <p className="font-extralight">
-                                        Time remaining before election starts
+                                        { isElectionEnded
+                                            ? "Election has ended"
+                                            : "Time remaining before election starts"}
                                     </p>
                                 )}
                                 <LiveClockUpdate
-                                    startDate={startDate}
-                                    endDate={endDate}
+                                    startDate={electionObject.start}
+                                    endDate={electionObject.end}
                                 />
                             </div>
                         </div>
@@ -177,7 +171,7 @@ const VoterDashboard = () => {
                                     position={position}
                                     onClickEvent={() => {
                                         navigate("positions/" + position.id, {
-                                            state: { position },
+                                            state: { position, election_id },
                                         });
                                     }}
                                 />

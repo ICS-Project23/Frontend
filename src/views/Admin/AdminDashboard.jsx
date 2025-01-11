@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import TopNavBar from "../../components/TopNavBar";
 import AdminSideBar from "../../components/AdminSideBar";
 import axios from "../../api/axios";
+import { redirect, useNavigate, useNavigation } from "react-router-dom";
+
 
 const AdminDashboard = () => {
     const [electionStatus, setElectionStatus] = useState(false);
+const navigate = useNavigate();
 
     const getElectionStatus = () => {
         axios
@@ -33,6 +36,16 @@ const AdminDashboard = () => {
                 console.log(error);
             });
     };
+    const authenticate = () => {
+        return axios
+            .get("/auth/verify/admin")
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => {
+                navigate("/admin/login");
+            });
+    };
 
     const startElection = () => {
         axios
@@ -58,6 +71,9 @@ const AdminDashboard = () => {
     };
 
     useEffect(() => {
+        authenticate().then(() => {
+            console.log("Authenticated");
+        })
         getElection()
             .then((election) => {
                 console.log(election);
@@ -74,7 +90,7 @@ const AdminDashboard = () => {
                 console.error("Error from server");
                 console.error(error);
             });
-    }, []);
+    }, [navigate]);
 
     return (
         <>
@@ -82,11 +98,11 @@ const AdminDashboard = () => {
             <div className="w-full h-screen flex flex-row">
                 <AdminSideBar />
                 <main className="w-3/4">
-                    {/* <iframe
-                        src="https://snapshots.raintank.io/dashboard/snapshot/cFbPJpTAALCq74CuDWpYclrXdgbugIZR"
+                    <iframe
+                        // src="https://snapshots.raintank.io/dashboard/snapshot/ZcABQi2r7IyiFVwKWTS3eZx9WNnFIm4p"
                         width="1200"
                         height="800"
-                    /> */}
+                    />
                 </main>
             </div>
         </>

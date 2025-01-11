@@ -27,9 +27,9 @@ const AdminSideBar = () => {
                         <span class="mx-4 font-medium">Dashboard</span>
                     </a>
 
-                    {/* <a
+                    <a
                         class="flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
-                        href="#"
+                        href="admin/register"
                     >
                         <svg
                             class="w-5 h-5"
@@ -54,7 +54,7 @@ const AdminSideBar = () => {
                         </svg>
 
                         <span class="mx-4 font-medium">Accounts</span>
-                    </a> */}
+                    </a>
 
                     <a
                         class="flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"

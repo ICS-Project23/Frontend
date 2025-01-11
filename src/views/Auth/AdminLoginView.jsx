@@ -3,18 +3,16 @@ import logo from "../../assets/votex-high-resolution-logo-transparent.png";
 import InputComponent from "../../components/InputComponent";
 import ButtonComponent from "../../components/ButtonComponent";
 import axios from "../../api/axios";
-// import socket from "../../config/Socket";
 import {
+    UNSAFE_createClientRoutesWithHMRRevalidationOptOut,
     useNavigate,
 } from "react-router-dom";
-import {ws} from "../../config/Socket";
 // import axios from 'axios'
 
-const LoginView = () => {
-    
+const AdminLoginView = () => {
     const navigate = useNavigate();
     const [loginData, setLoginData] = React.useState({
-        national_identification_number: "",
+        user_name: "",
         password: "",
     });
     function getCookie(name) {
@@ -28,14 +26,13 @@ const LoginView = () => {
         e.preventDefault();
         console.log(loginData);
         axios
-            .post("/auth/login", loginData)
+            .post("/auth/login/admin", loginData)
             .then((response) => {
                 console.log("Response from express server");
                 console.log(response);
                 const wallet_address = getCookie("wallet_address");
                 console.log("Wallet address: ", wallet_address);
-                navigate("/dashboard");
-                
+                navigate("/admin/dashboard");
             })
             .catch((error) => {
                 console.error("Error from express server");
@@ -45,9 +42,6 @@ const LoginView = () => {
 
     return (
         <div className="w-full h-screen flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center justify-center">
-                <img src={logo} alt="Logo" className="w-96" />
-            </div>
             <div className="h-2/3 w-1/4 mt-20 flex flex-col items-center justify-center rounded-2xl shadow-2xl">
                 <div className="flex flex-col items-center justify-center mb-3">
                     <p className="text-[40px] text-gray-600 tracking-wider">
@@ -59,13 +53,13 @@ const LoginView = () => {
                 </div>
                 <form onSubmit={handleSubmit}>
                     <InputComponent
-                        label={"National ID/Passport Number"}
-                        input_name={"national_identification_number"}
-                        input_type={"number"}
+                        label={"User Name"}
+                        input_name={"user_name"}
+                        input_type={"text"}
                         onChange={(e) => {
                             setLoginData({
                                 ...loginData,
-                                national_identification_number: e.target.value,
+                                user_name: e.target.value,
                             });
                             console.log(loginData);
                         }}
@@ -94,4 +88,4 @@ const LoginView = () => {
     );
 };
 
-export default LoginView;
+export default AdminLoginView;
